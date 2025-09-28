@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Library Book Catalog</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #searchBox {
+      display: block;
+      margin: 30px auto 20px auto;
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    #results {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    #results p {
+      margin: 10px 0;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+      color: #34495e;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Library Book Catalog</h1>
+
+  <form id="bookForm">
+    <input type="text" name="title" placeholder="Book Title" required />
+    <input type="text" name="author" placeholder="Author" required />
+    <input type="text" name="isbn" placeholder="ISBN" required />
+    <button type="submit">Add Book</button>
+  </form>
+
+  <input type="text" id="searchBox" placeholder="Search by title..." />
+
+  <div id="results"></div>
+
+  <script>
+    document.getElementById("bookForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const book = Object.fromEntries(formData.entries());
+
+      await fetch("/addBook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(book)
+      });
+
+      e.target.reset();
+    };
+
+    document.getElementById("searchBox").oninput = async (e) => {
+      const title = e.target.value;
+      const res = await fetch(`/search?title=${title}`);
+      const books = await res.json();
+
+      document.getElementById("results").innerHTML = books
+        .map(b => `<p><strong>${b.title}</strong> by ${b.author} (ISBN: ${b.isbn})</p>`)
+        .join("");
+    };
+  </script>
+
+</body>
+</html>
